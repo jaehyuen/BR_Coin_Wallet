@@ -1,0 +1,26 @@
+spring:
+    application:
+        name: brwallet
+    datasource:
+        initialization-mode: always
+        password: 1111
+        url: jdbc:mysql://192.168.56.127:3306/brwallet?serverTimezone=UTC
+        username: root
+        hikari:
+            auto-commit: false
+            connection-test-query: SELECT 1
+            minimum-idle: 10
+            maximum-pool-size: 50
+            transaction-isolation: TRANSACTION_READ_UNCOMMITTED
+            pool-name: pool-brwallet
+
+    jpa:
+        hibernate:
+            ddl-auto: update
+            naming:
+                implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+                physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        properties:
+            hibernate:
+                format_sql: true
+        show-sql: true
