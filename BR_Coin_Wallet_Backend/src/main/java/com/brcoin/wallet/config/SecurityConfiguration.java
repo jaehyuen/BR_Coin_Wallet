@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.brcoin.wallet.acount.service.UserDetailsServiceImpl;
+import com.brcoin.wallet.common.opt.OtpAuthenicationProvider;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,9 +21,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-	private final UserDetailsServiceImpl  userDetailsService;
-	
-//	private final TestAuthProvider testAuthProvider;
+	private final UserDetailsServiceImpl   userDetailsService;
+	private final OtpAuthenicationProvider otpAuthenicationProvider;
 
 	@Bean(BeanIds.AUTHENTICATION_MANAGER)
 	@Override
@@ -39,6 +39,8 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 			.authorizeRequests()
 			.antMatchers("/api/**")
 			.permitAll()
+			.antMatchers("/v3/api-docs", "/configuration/ui", "/swagger-resources/**", "/configuration/security", "/swagger-ui.html", "/webjars/**")
+			.permitAll()
 			.anyRequest()
 			.authenticated();
 
@@ -47,17 +49,20 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
 		authenticationManagerBuilder.userDetailsService(userDetailsService)
-			.passwordEncoder(passwordEncoder());
+			.passwordEncoder(passwordEncoder())
+			.and()
+			.authenticationProvider(otpAuthenicationProvider);
 	}
 
-	@Override
-	public void configure(WebSecurity web) {
-		web.ignoring()
-			.antMatchers("/v2/api-docs", "/swagger-resources/**", "/swagger-ui.html", "/webjars/**", "/swagger/**");
-	}
+//	@Override
+//	public void configure(WebSecurity web) {
+//		web.ignoring()
+//			.antMatchers("/v2/api-docs", "/swagger-resources/**", "/swagger-ui.html", "/webjars/**", "/swagger/**");
+//	}
 
 	@Bean
 	PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
+
 }

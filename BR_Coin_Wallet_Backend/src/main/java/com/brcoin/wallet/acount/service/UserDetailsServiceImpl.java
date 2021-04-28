@@ -8,14 +8,13 @@ import javax.persistence.EntityNotFoundException;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.brcoin.wallet.acount.entity.UserEntity;
 import com.brcoin.wallet.acount.repository.UserRepository;
+import com.brcoin.wallet.common.opt.OtpUser;
 
 import lombok.AllArgsConstructor;
 
@@ -33,11 +32,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	 */
 	@Override
 	@Transactional(readOnly = true)
-	public UserDetails loadUserByUsername(String userId) {
+	public OtpUser loadUserByUsername(String userId) {
 		Optional<UserEntity> userOptional = userRepository.findByUserId(userId);
 		UserEntity           user         = userOptional.orElseThrow(() -> new EntityNotFoundException("No user Found with userId: " + userId));
 
-		return new User(user.getUserId(), user.getUserPassword(), user.isActive(), true, true, true, getAuthorities("USER"));
+		return new OtpUser(user.getUserId(), user.getUserPassword(), user.isActive(), true, true, true, getAuthorities("USER"), user.getOtpKey());
 	}
 
 	private Collection<? extends GrantedAuthority> getAuthorities(String role) {

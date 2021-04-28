@@ -117,6 +117,12 @@
 			<groupId>com.querydsl</groupId>
 			<artifactId>querydsl-apt</artifactId>
 		</dependency>
+		<dependency>
+    <groupId>com.warrenstrange</groupId>
+    <artifactId>googleauth</artifactId>
+    <version>1.2.0</version>
+</dependency>
+		
 	</dependencies>
 
 	<build>

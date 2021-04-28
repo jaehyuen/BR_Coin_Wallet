@@ -21,9 +21,6 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/wallet/auth")
 @RequiredArgsConstructor
-
-//TODO 스프링시큐리티로 권한 관리 추가
-@SuppressWarnings("rawtypes")
 public class AuthController {
 
 	private final AuthService         authService;
@@ -40,7 +37,8 @@ public class AuthController {
 	@Operation(summary = "로그인", description = "로그인 API")
 	@PostMapping("/login")
 	public ResponseEntity<ResultVo> login(@Parameter(required = true) @RequestBody LoginVo loginVo) {
-
+		
+		System.out.println("test");
 		return ResponseEntity.status(HttpStatus.OK).body(authService.login(loginVo));
 	}
 
@@ -58,9 +56,7 @@ public class AuthController {
 
 		return ResponseEntity.status(HttpStatus.OK).body(refreshTokenService.deleteRefreshToken(refreshTokenVo.getRefreshToken()));
 	}
-	
 
-	
 }
 
 

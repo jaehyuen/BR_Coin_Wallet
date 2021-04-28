@@ -39,6 +39,9 @@ public class UserEntity extends BaseEntity {
 	@Column(name = "USER_EMAIL")
 	private String  userEmail;
 
+	@Column(name = "USER_OTP_KEY")
+	private String  otpKey;
+
 	@Column(name = "ACTIVE")
 	private boolean active;
 }

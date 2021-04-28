@@ -10,6 +10,7 @@ public class UserVo {
 	private String  userPassword; // 사용자 비밀번호
 	private String  userEmail;    // 사용자 이메일
 	private String  userName;     // 사용자 이름
+	private String  otpKey;       // opt 키 
 	private boolean active;       // 계정 활성화 상태
 
 }
