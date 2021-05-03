@@ -2,9 +2,12 @@ package com.brcoin.wallet.acount.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
 
@@ -24,24 +27,25 @@ public class UserEntity extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ID")
-	private Long    id;
+	private Long      id;
 
-	@Column(name = "USER_NAME")
-	private String  userName;
+	@Column(name = "USER_NAME", nullable = false)
+	private String    userName;
 
-	@Column(name = "USER_ID", unique = true)
-	private String  userId;
+	@Column(name = "USER_ID", unique = true, nullable = false)
+	private String    userId;
 
-	@Column(name = "USER_PASSWORD")
-	private String  userPassword;
+	@Column(name = "USER_PASSWORD", nullable = false)
+	private String    userPassword;
 
 	@Email
-	@Column(name = "USER_EMAIL")
-	private String  userEmail;
+	@Column(name = "USER_EMAIL", nullable = false)
+	private String    userEmail;
 
-	@Column(name = "USER_OTP_KEY")
-	private String  otpKey;
+	@OneToOne(targetEntity = OtpEntity.class, fetch = FetchType.EAGER)
+	@JoinColumn(name = "OTP_KEY")
+	private OtpEntity otpEntity;
 
 	@Column(name = "ACTIVE")
-	private boolean active;
+	private boolean   active;
 }

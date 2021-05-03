@@ -10,4 +10,5 @@ import com.brcoin.wallet.acount.entity.UserEntity;
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 	Optional<UserEntity> findByUserId(String userId);
+	UserEntity findByUserIdAndUserPassword(String userId,String userPassword);
 }

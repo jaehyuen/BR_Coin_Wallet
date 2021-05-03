@@ -1,5 +1,7 @@
 package com.brcoin.wallet.acount.controller;
 
+import javax.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,11 +29,20 @@ public class AuthController {
 	private final RefreshTokenService refreshTokenService;
 	
 	
+	
 	@Operation(summary = "회원가입", description = "회원가입 API")
 	@PostMapping("/register")
-	public ResponseEntity<ResultVo> register(@Parameter(description = "회원가입 정보 DTO", required = true) @RequestBody RegisterVo registerVo) {
+	public ResponseEntity<ResultVo> register(@Parameter(description = "회원가입 정보 DTO", required = true) @RequestBody @Valid RegisterVo registerVo) {
 
 		return ResponseEntity.status(HttpStatus.OK).body(authService.register(registerVo));
+	}
+	
+	@Operation(summary = "계정 인증", description = "회원가입을 완료한 계정을 인증하는 API")
+	@PostMapping("/otpcheck")
+	public ResponseEntity<ResultVo> optCheck(@Parameter(required = true) @RequestBody LoginVo loginVo) {
+		
+		System.out.println("test");
+		return ResponseEntity.status(HttpStatus.OK).body(authService.optCheck(loginVo));
 	}
 
 	@Operation(summary = "로그인", description = "로그인 API")
@@ -56,6 +67,26 @@ public class AuthController {
 
 		return ResponseEntity.status(HttpStatus.OK).body(refreshTokenService.deleteRefreshToken(refreshTokenVo.getRefreshToken()));
 	}
+	
+//	@PostMapping("/test")
+//	public ResponseEntity<String> saveLocation() {
+//
+//		emailService.sendEmail("violet65206520@gmail.com", "스프링을 이용한 메일 전송", "되는지 테스트 하는 거예요");
+//
+//		return ResponseEntity.status(HttpStatus.OK)
+//			.body("");
+//	}
+//	
+//	@GetMapping(value = "/test",produces = MediaType.IMAGE_JPEG_VALUE)
+//	public @ResponseBody byte[] imgetest()throws IOException{
+//
+//		emailService.sendEmail("violet65206520@gmail.com", "스프링을 이용한 메일 전송", "되는지 테스트 하는 거예요");
+//		InputStream in  =getClass().getResourceAsStream("/");
+//		return IOUtils.
+//
+//	}
+	 
+
 
 }
 
