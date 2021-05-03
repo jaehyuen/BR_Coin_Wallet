@@ -34,3 +34,11 @@ spring:
           auth: true
           starttls:
             enable: true
+
+email:
+  message: |
+           1. Andriod용 Google OTP 및 IOS용 Google Authenticator 애플리케이션을 다운로드하십시오. <br>
+           <br>
+           2. 앱으로 아래 QR코드를 스캔하여 OTP를 등록하십시오.<br>
+           <br>
+  subject: barakwallet qrcode 발송

@@ -43,8 +43,8 @@ public class JwtProvider {
 	}
 
 	public String generateToken(Authentication authentication) {
-		User principal = (User) authentication.getPrincipal();
-		return Jwts.builder().setSubject(principal.getUsername()).setIssuedAt(from(Instant.now()))
+//		User principal = (User) authentication.getPrincipal();
+		return Jwts.builder().setSubject((String)authentication.getPrincipal()).setIssuedAt(from(Instant.now()))
 				.signWith(getPrivateKey()).setExpiration(Date.from(Instant.now().plusMillis(jwtExpirationInMillis)))
 				.compact();
 	}

@@ -19,7 +19,6 @@ public class OtpAuthenicationProvider implements AuthenticationProvider {
 	
 	private final UserDetailsServiceImpl userDetailsService;
 	
-	
 	private final IGoogleAuthenticator googleAuthenticator;
 
 	@Override
@@ -27,7 +26,7 @@ public class OtpAuthenicationProvider implements AuthenticationProvider {
 
 		String            userId = (String) authentication.getPrincipal();
 		String            password = (String) authentication.getCredentials();
-		int optCode = 0;
+		int optCode = 1234567;
 		
 		if(authentication.getClass().equals(OtpAuthenticationToken.class)) {
 			
@@ -38,9 +37,16 @@ public class OtpAuthenicationProvider implements AuthenticationProvider {
 		System.out.println("in auth");
 		System.out.println("userId "+userId);
 		System.out.println("password "+password);
+		System.out.println("optCode "+optCode);
+		
 		
 
 		OtpUser user     = userDetailsService.loadUserByUsername(userId);
+		System.out.println("optkey "+user.getOtpKey());
+		
+		if (!user.isEnabled()) {
+			throw new BadCredentialsException(userId);
+		}
 		
 		if (!userId.equals(user.getUsername())) {
 			throw new BadCredentialsException(userId);
@@ -50,9 +56,7 @@ public class OtpAuthenicationProvider implements AuthenticationProvider {
 			throw new BadCredentialsException(userId);
 		}
 
-		if (!user.isEnabled()) {
-			throw new BadCredentialsException(userId);
-		}
+
 
 		return new UsernamePasswordAuthenticationToken(userId, password, user.getAuthorities());
 

@@ -4,6 +4,7 @@ import java.time.Instant;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -48,6 +49,12 @@ public class AuthService {
 	private final EmailClient           emailClient;
 	private final OtpClient             otpClient;
 
+	@Value("${email.message}")
+	private String                      mailMessage;
+
+	@Value("${email.subject}")
+	private String                      mailSubject;
+
 	/**
 	 * 회원가입 서비스
 	 * 
@@ -60,11 +67,10 @@ public class AuthService {
 
 		try {
 
-			logger.info("this is registerVo : " + registerVo);
-
 			GoogleAuthenticatorKey key   = otpClient.createKey();
 			String                 qrUrl = otpClient.createQrUrl(registerVo.getUserName(), "test", key);
 
+			// qr코드 이미지 저장
 			util.saveImage(qrUrl, key.getKey());
 
 			// otp 정보 생성
@@ -85,12 +91,12 @@ public class AuthService {
 			userEntity.setOtpEntity(otpEntity);
 			userEntity.setActive(false);
 
-			logger.info("this is userEntity : " + userEntity);
-
 			// 유저 정보 엔티티 저장
 			userRepository.save(userEntity);
 
-			emailClient.sendEmail(registerVo.getUserEmail(), "큐알코드 ㅋㅋ", "이거 쓰셈", key.getKey());
+			String str = "<h3>" + registerVo.getUserName() + "님 회원가입을 환영합니다.</h3><br>아래 설명을 따라서 OTP 등록을 진행해 주시기 바랍니다.<br><br>";
+
+			emailClient.sendEmail(registerVo.getUserEmail(), mailSubject, str + mailMessage, key.getKey());
 
 		} catch (Exception e) {
 
@@ -99,10 +105,19 @@ public class AuthService {
 			return util.setResult("9999", false, e.getMessage(), null);
 
 		}
-		return util.setResult("0000", true, "Success register", null);
+		return util.setResult("0000", true, "Success register ", null);
 	}
 
-	public ResultVo<JwtTokenVo> optCheck(LoginVo loginVo) {
+	/**
+	 * OTP 인증 서비스(계정 인증)
+	 * 
+	 * @param loginVo 로그인 관련 정보 DTO
+	 * 
+	 * @return
+	 * 
+	 */
+	
+	public ResultVo<Object> active(LoginVo loginVo) {
 
 		UserEntity user = userRepository.findByUserId(loginVo.getUserId())
 			.orElseThrow(IllegalArgumentException::new);
@@ -111,6 +126,7 @@ public class AuthService {
 			return util.setResult("9999", false, "fail login", null);
 		}
 
+		//오티피 정보 확인시 계정 활성화
 		if (otpClient.otpAuthorize(user.getOtpEntity()
 			.getOptKey(), loginVo.getOtpCode())) {
 			user.setActive(true);
