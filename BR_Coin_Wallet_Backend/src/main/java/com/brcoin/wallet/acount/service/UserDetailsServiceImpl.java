@@ -34,7 +34,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	@Transactional(readOnly = true)
 	public OtpUser loadUserByUsername(String userId) {
 		Optional<UserEntity> userOptional = userRepository.findByUserId(userId);
-		UserEntity           user         = userOptional.orElseThrow(() -> new EntityNotFoundException("No user Found with userId: " + userId));
+		UserEntity           user         = userOptional.orElseThrow(() -> new IllegalArgumentException("can't find user "+userId+" in database"));
 
 		
 		return new OtpUser(user.getUserId(), user.getUserPassword(), user.isActive(), true, true, true, getAuthorities("USER"), user.getOtpEntity().getOptKey());

@@ -5,6 +5,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import com.brcoin.wallet.acount.service.UserDetailsServiceImpl;
@@ -16,51 +17,51 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OtpAuthenicationProvider implements AuthenticationProvider {
 
-	
 	private final UserDetailsServiceImpl userDetailsService;
-	
-	private final IGoogleAuthenticator googleAuthenticator;
+
+	private final PasswordEncoder        passwordEncoder;
+
+	private final IGoogleAuthenticator   googleAuthenticator;
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
-		String            userId = (String) authentication.getPrincipal();
-		String            password = (String) authentication.getCredentials();
-		int optCode = 1234567;
-		
-		if(authentication.getClass().equals(OtpAuthenticationToken.class)) {
-			
+		String userId   = (String) authentication.getPrincipal();
+		String password = (String) authentication.getCredentials();
+		int    optCode  = 0;
+
+		if (authentication.getClass()
+			.equals(OtpAuthenticationToken.class)) {
+
 			optCode = ((OtpAuthenticationToken) authentication).getOtpCode();
 		}
-		
-		
-		System.out.println("in auth");
-		System.out.println("userId "+userId);
-		System.out.println("password "+password);
-		System.out.println("optCode "+optCode);
-		
-		
 
-		OtpUser user     = userDetailsService.loadUserByUsername(userId);
-		System.out.println("optkey "+user.getOtpKey());
-		
-		if (!user.isEnabled()) {
-			throw new BadCredentialsException(userId);
-		}
-		
+		System.out.println("in auth");
+		System.out.println("userId " + userId);
+		System.out.println("password " + password);
+		System.out.println("optCode " + optCode);
+
+		OtpUser user = userDetailsService.loadUserByUsername(userId);
+		System.out.println("optkey " + user.getOtpKey());
+
 		if (!userId.equals(user.getUsername())) {
-			throw new BadCredentialsException(userId);
+			throw new BadCredentialsException(userId + " 계정의 아이디가 틀림");
+		}
+
+		if (!passwordEncoder.matches(password, user.getPassword())) {
+			throw new BadCredentialsException(userId + " 계정의 비밀번호가 틀렸습니다.");
+		}
+
+		if (!user.isEnabled()) {
+			throw new BadCredentialsException(userId + " 계정이 잠겨 있습니다.");
 		}
 
 		if (!googleAuthenticator.authorize(user.getOtpKey(), optCode)) {
-			throw new BadCredentialsException(userId);
+			throw new BadCredentialsException(userId + " 계정의 OTP 코드가 틀렸습니다.");
 		}
-
-
 
 		return new UsernamePasswordAuthenticationToken(userId, password, user.getAuthorities());
 
-		
 	}
 
 	@Override
@@ -68,7 +69,5 @@ public class OtpAuthenicationProvider implements AuthenticationProvider {
 		// TODO Auto-generated method stub
 		return true;
 	}
-	
-
 
 }

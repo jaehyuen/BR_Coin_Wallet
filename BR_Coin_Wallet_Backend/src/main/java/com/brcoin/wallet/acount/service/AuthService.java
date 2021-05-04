@@ -120,7 +120,8 @@ public class AuthService {
 	public ResultVo<Object> active(LoginVo loginVo) {
 
 		UserEntity user = userRepository.findByUserId(loginVo.getUserId())
-			.orElseThrow(IllegalArgumentException::new);
+			.orElseThrow(() ->new IllegalArgumentException("can't find user "+loginVo.getUserId()+" in database"));
+		
 
 		if (!passwordEncoder.matches(loginVo.getUserPassword(), user.getUserPassword())) {
 			return util.setResult("9999", false, "fail login", null);

@@ -27,9 +27,8 @@ import io.jsonwebtoken.Jwts;
 @Service
 public class JwtProvider {
 
-	private KeyStore keyStore;
-	private final Long jwtExpirationInMillis = (long) (1000 * 3600); 
-
+	private KeyStore   keyStore;
+	private final Long jwtExpirationInMillis = (long) (1000 * 3600);
 
 	@PostConstruct
 	public void init() {
@@ -43,15 +42,27 @@ public class JwtProvider {
 	}
 
 	public String generateToken(Authentication authentication) {
-//		User principal = (User) authentication.getPrincipal();
-		return Jwts.builder().setSubject((String)authentication.getPrincipal()).setIssuedAt(from(Instant.now()))
-				.signWith(getPrivateKey()).setExpiration(Date.from(Instant.now().plusMillis(jwtExpirationInMillis)))
-				.compact();
+		User principal = (User) authentication.getPrincipal();
+		return Jwts.builder()
+			.setSubject(principal.getUsername())
+			.setIssuedAt(from(Instant.now()))
+			.signWith(getPrivateKey())
+			.setExpiration(Date.from(Instant.now()
+				.plusMillis(jwtExpirationInMillis)))
+			.compact();
+//		return Jwts.builder().setSubject((String)authentication.getPrincipal()).setIssuedAt(from(Instant.now()))
+//				.signWith(getPrivateKey()).setExpiration(Date.from(Instant.now().plusMillis(jwtExpirationInMillis)))
+//				.compact();
 	}
 
 	public String generateTokenWithUserName(String userName) {
-		return Jwts.builder().setSubject(userName).setIssuedAt(from(Instant.now())).signWith(getPrivateKey())
-				.setExpiration(Date.from(Instant.now().plusMillis(jwtExpirationInMillis))).compact();
+		return Jwts.builder()
+			.setSubject(userName)
+			.setIssuedAt(from(Instant.now()))
+			.signWith(getPrivateKey())
+			.setExpiration(Date.from(Instant.now()
+				.plusMillis(jwtExpirationInMillis)))
+			.compact();
 	}
 
 	private PrivateKey getPrivateKey() {
@@ -65,7 +76,8 @@ public class JwtProvider {
 	public boolean validateToken(String jwt) {
 
 		try {
-			parser().setSigningKey(getPublickey()).parseClaimsJws(jwt);
+			parser().setSigningKey(getPublickey())
+				.parseClaimsJws(jwt);
 			return true;
 		} catch (Exception e) {
 
@@ -76,14 +88,17 @@ public class JwtProvider {
 
 	private PublicKey getPublickey() {
 		try {
-			return keyStore.getCertificate("brchain").getPublicKey();
+			return keyStore.getCertificate("brchain")
+				.getPublicKey();
 		} catch (KeyStoreException e) {
 			throw new RuntimeException("Exception occured while retrieving public key from keystore", e);
 		}
 	}
 
 	public String getUsernameFromJwt(String token) {
-		Claims claims = parser().setSigningKey(getPublickey()).parseClaimsJws(token).getBody();
+		Claims claims = parser().setSigningKey(getPublickey())
+			.parseClaimsJws(token)
+			.getBody();
 
 		return claims.getSubject();
 	}

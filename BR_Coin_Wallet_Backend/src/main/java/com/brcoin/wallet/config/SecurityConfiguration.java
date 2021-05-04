@@ -6,13 +6,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.brcoin.wallet.acount.service.UserDetailsServiceImpl;
 import com.brcoin.wallet.common.opt.OtpAuthenicationProvider;
 
 import lombok.RequiredArgsConstructor;
@@ -21,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-	private final UserDetailsServiceImpl   userDetailsService;
 	private final OtpAuthenicationProvider otpAuthenicationProvider;
 
 	@Bean(BeanIds.AUTHENTICATION_MANAGER)
@@ -48,10 +43,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-		authenticationManagerBuilder.userDetailsService(userDetailsService)
-			.passwordEncoder(passwordEncoder())
-			.and()
-			.authenticationProvider(otpAuthenicationProvider);
+		authenticationManagerBuilder.authenticationProvider(otpAuthenicationProvider);
 	}
 
 //	@Override
@@ -59,10 +51,5 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 //		web.ignoring()
 //			.antMatchers("/v2/api-docs", "/swagger-resources/**", "/swagger-ui.html", "/webjars/**", "/swagger/**");
 //	}
-
-	@Bean
-	PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
 
 }
