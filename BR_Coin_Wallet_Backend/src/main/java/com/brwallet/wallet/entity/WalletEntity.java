@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@Table(name = "OTP")
+@Table(name = "WALLET")
 @AllArgsConstructor
 @NoArgsConstructor
 public class WalletEntity extends BaseEntity {

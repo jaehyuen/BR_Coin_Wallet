@@ -1,5 +1,8 @@
 package com.brwallet.common.error;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import com.brwallet.common.Util;
 import com.brwallet.common.vo.ResultVo;
 
+import io.jsonwebtoken.io.IOException;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -45,6 +49,13 @@ public class ControllerExceptionHandler {
 	// 로그인 에러
 	@ExceptionHandler(BadCredentialsException.class)
 	protected ResponseEntity<ResultVo> test(BadCredentialsException e) {
+
+		return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+			.body(util.setResult("9999", false, e.getMessage(), null));
+	}
+
+	@ExceptionHandler({ NoSuchAlgorithmException.class, NoSuchProviderException.class, IOException.class })
+	protected ResponseEntity<ResultVo> test(Exception e) {
 
 		return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
 			.body(util.setResult("9999", false, e.getMessage(), null));

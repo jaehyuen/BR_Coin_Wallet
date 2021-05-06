@@ -21,7 +21,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/wallet/auth")
+@RequestMapping("/api/brwallet/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
