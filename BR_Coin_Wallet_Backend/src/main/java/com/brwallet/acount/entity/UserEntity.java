@@ -11,6 +11,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.Email;
 
+import com.brwallet.wallet.entity.WalletEntity;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -45,6 +47,10 @@ public class UserEntity extends BaseEntity {
 	@OneToOne(targetEntity = OtpEntity.class, fetch = FetchType.EAGER)
 	@JoinColumn(name = "OTP_KEY")
 	private OtpEntity otpEntity;
+	
+	@OneToOne(targetEntity = WalletEntity.class, fetch = FetchType.EAGER)
+	@JoinColumn(name = "WALLET_ADDRESS")
+	private WalletEntity walletEntity;
 
 	@Column(name = "ACTIVE")
 	private boolean   active;
