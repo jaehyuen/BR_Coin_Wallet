@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@Table(name = "USER")
+@Table(name = "BR_USER")
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserEntity extends BaseEntity {
@@ -29,29 +29,32 @@ public class UserEntity extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ID")
-	private Long      id;
+	private Long         id;
 
 	@Column(name = "USER_NAME", nullable = false)
-	private String    userName;
+	private String       userName;
 
 	@Column(name = "USER_ID", unique = true, nullable = false)
-	private String    userId;
+	private String       userId;
 
 	@Column(name = "USER_PASSWORD", nullable = false)
-	private String    userPassword;
+	private String       userPassword;
 
 	@Email
 	@Column(name = "USER_EMAIL", nullable = false)
-	private String    userEmail;
+	private String       userEmail;
 
 	@OneToOne(targetEntity = OtpEntity.class, fetch = FetchType.EAGER)
 	@JoinColumn(name = "OTP_KEY")
-	private OtpEntity otpEntity;
-	
+	private OtpEntity    otpEntity;
+
 	@OneToOne(targetEntity = WalletEntity.class, fetch = FetchType.EAGER)
 	@JoinColumn(name = "WALLET_ADDRESS")
 	private WalletEntity walletEntity;
 
 	@Column(name = "ACTIVE")
-	private boolean   active;
+	private boolean      active;
+
+	@Column(name = "PRIVATE_KEY_YN")
+	private boolean      privateKeyYn;
 }

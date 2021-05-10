@@ -1,5 +1,7 @@
 package com.brwallet.common.opt;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,10 +20,10 @@ import lombok.RequiredArgsConstructor;
 public class OtpAuthenicationProvider implements AuthenticationProvider {
 
 	private final UserDetailsServiceImpl userDetailsService;
-
 	private final PasswordEncoder        passwordEncoder;
-
 	private final IGoogleAuthenticator   googleAuthenticator;
+
+	private Logger                       logger = LoggerFactory.getLogger(this.getClass());
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -36,16 +38,15 @@ public class OtpAuthenicationProvider implements AuthenticationProvider {
 			optCode = ((OtpAuthenticationToken) authentication).getOtpCode();
 		}
 
-		System.out.println("in auth");
-		System.out.println("userId " + userId);
-		System.out.println("password " + password);
-		System.out.println("optCode " + optCode);
-
 		OtpUser user = userDetailsService.loadUserByUsername(userId);
-		System.out.println("optkey " + user.getOtpKey());
+
+		logger.debug("[createWallet] userId -> " + userId);
+		logger.debug("[createWallet] password -> " + password);
+		logger.debug("[createWallet] optCode -> " + optCode);
+		logger.debug("[createWallet] optCode -> " + optCode);
 
 		if (!userId.equals(user.getUsername())) {
-			throw new BadCredentialsException(userId + " 계정의 아이디가 틀림");
+			throw new BadCredentialsException(userId + " 계정의 아이디가 틀렸습니다.");
 		}
 
 		if (!passwordEncoder.matches(password, user.getPassword())) {

@@ -3,15 +3,23 @@ package com.brwallet.wallet.service;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.brwallet.acount.entity.UserEntity;
+import com.brwallet.acount.service.AuthService;
 import com.brwallet.client.CryptoClient;
+import com.brwallet.common.BridgePath;
 import com.brwallet.common.Util;
 import com.brwallet.common.vo.ResultVo;
+import com.brwallet.wallet.entity.WalletEntity;
+import com.brwallet.wallet.repository.WalletRepository;
+import com.brwallet.wallet.vo.CreateWalletVo;
+import com.brwallet.wallet.vo.KeyPairVo;
 import com.brwallet.wallet.vo.WalletVo;
 
 import lombok.RequiredArgsConstructor;
@@ -20,42 +28,69 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WalletService {
 
-	private final CryptoClient cryptoClient;
-	private final Util         util;
+	private final AuthService      authService;
+	private final CryptoClient     cryptoClient;
+	private final WalletRepository walletRepository;
+	private final Util             util;
 
-	public String test() {
-		Authentication test = SecurityContextHolder.getContext()
+	private Logger                 logger = LoggerFactory.getLogger(this.getClass());
+
+	public ResultVo<String> createWallet(CreateWalletVo createWalletVo) {
+
+		logger.debug("[createWallet] start ");
+		logger.debug("[createWallet] createWalletVo -> " + createWalletVo);
+
+		Authentication   loginedUser = SecurityContextHolder.getContext()
 			.getAuthentication();
-		System.out.println(test.getCredentials());
-		System.out.println(test.getName());
-		System.out.println(test.getPrincipal());
+		UserEntity       user        = authService.findUserByUserId(loginedUser.getName());
+		ResultVo<String> result      = new ResultVo<String>();
+
+		logger.debug("[createWallet] loginedUser is  -> " + loginedUser.getName());
 
 		try {
-			Map<String, String> a = cryptoClient.generateKeys();
-			System.out.println(a.get("private"));
-			System.out.println(a.get("public"));
+			KeyPairVo keyPair = cryptoClient.generateKeys();
+
+			logger.debug("[createWallet] keyPair is  -> " + keyPair);
+
+			createWalletVo.setPublicKey(keyPair.getPublicKey());
+
+			result = util.sendPost(BridgePath.POST_WALLET.getValue(), createWalletVo, String.class);
+
+			WalletEntity wallet = new WalletEntity();
+			wallet.setWalletAddress(result.getResultData());
+			wallet.setPublicKey(keyPair.getPublicKey());
+
+			if (createWalletVo.isPrivKeyYn()) {
+				wallet.setPrivateKey(keyPair.getPrivateKey());
+
+			}
+
+			walletRepository.save(wallet);
+
+			user.setPrivateKeyYn(createWalletVo.isPrivKeyYn());
+			user.setWalletEntity(wallet);
+			authService.saveUserEntity(user);
+
 		} catch (NoSuchAlgorithmException | NoSuchProviderException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+			logger.debug("[createWallet] error ");
+
 		}
 
-		return "";
+		logger.debug("[createWallet] finish ");
+		return result;
 	}
 
-	public void getWallet(String walletId) {
+	public ResultVo<WalletVo> getWallet(String walletId) {
 
-		System.out.println("walletId is : " + walletId);
-		String path = "/api/brcoin/wallet?walletId=" + walletId;
-		System.out.println("path it : " + path);
-		
-		ResultVo<WalletVo> test1 = new ResultVo<WalletVo>();
-		WalletVo test2 = new WalletVo();
-		
-		System.out.println("test1 type : "+test1.getClass().getGenericSuperclass());
-		System.out.println("test2 type : "+test2.getClass().getGenericSuperclass());
-		WalletVo a = util.sendGet(path, WalletVo.class);
+		logger.debug("[getWallet] start ");
+		logger.debug("[getWallet] walletId -> " + walletId);
 
-		System.out.println("return is : " + a);
+		ResultVo<WalletVo> result = util.sendGet(BridgePath.GET_WALLET.getValue() + walletId, WalletVo.class);
+
+		logger.debug("[getWallet] finish ");
+
+		return result;
 
 	}
 

@@ -21,7 +21,6 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.crypto.Cipher;
@@ -29,29 +28,36 @@ import javax.crypto.Cipher;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.brwallet.wallet.vo.KeyPairVo;
 
 @Component
 public class CryptoClient {
 
-	final int KEY_SIZE = 1024;
+	final int      KEY_SIZE = 1024;
+	private Logger logger   = LoggerFactory.getLogger(this.getClass());
 
-	public Map<String, String> generateKeys() throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+	public KeyPairVo generateKeys() throws NoSuchAlgorithmException, NoSuchProviderException, IOException {
+
 		Security.addProvider(new BouncyCastleProvider());
 
 		KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA", "BC");
 		generator.initialize(KEY_SIZE);
 
-		KeyPair             keyPair   = generator.generateKeyPair();
+		KeyPair       keyPair   = generator.generateKeyPair();
 
-		RSAPrivateKey       priv      = (RSAPrivateKey) keyPair.getPrivate();
-		RSAPublicKey        pub       = (RSAPublicKey) keyPair.getPublic();
+		RSAPrivateKey priv      = (RSAPrivateKey) keyPair.getPrivate();
+		RSAPublicKey  pub       = (RSAPublicKey) keyPair.getPublic();
 
-		Map<String, String> resultMap = new HashMap<String, String>();
-		resultMap.put("private", getKeyString(priv, "BRCOIN PRIVATE KEY"));
-		resultMap.put("public", getKeyString(pub, "BRCOIN PUBLIC KEY"));
+		KeyPairVo     keyPairVo = new KeyPairVo();
 
-		return resultMap;
+		keyPairVo.setPrivateKey(getKeyString(priv, "BRCOIN PRIVATE KEY"));
+		keyPairVo.setPublicKey(getKeyString(pub, "BRCOIN PUBLIC KEY"));
+
+		return keyPairVo;
 
 	}
 
@@ -90,11 +96,11 @@ public class CryptoClient {
 		String encryptedData = null;
 		try {
 			// 개인키 string을 개인키 객체로 변환
-			
+
 			PrivateKey privateKey = getPrivateKey(privKey);
 
 			// 만들어진 공개키객체를 기반으로 암호화모드로 설정
-			Cipher    cipher    = Cipher.getInstance("RSA");
+			Cipher     cipher     = Cipher.getInstance("RSA");
 			cipher.init(Cipher.ENCRYPT_MODE, privateKey);
 
 			// 평문을 암호화
@@ -103,7 +109,7 @@ public class CryptoClient {
 				.encodeToString(byteEncryptedData);
 
 		} catch (Exception e) {
-			 e.printStackTrace();
+			e.printStackTrace();
 		}
 		return encryptedData;
 
@@ -113,11 +119,11 @@ public class CryptoClient {
 		String decryptedData = null;
 		try {
 			// 공개키 string을 공개키 객체로 변환
-			
+
 			PublicKey publicKey = getPublicKey(pubKey);
 
 			// 만들어진 개인키객체를 기반으로 암호화모드로 설정하는 과정
-			Cipher     cipher     = Cipher.getInstance("RSA");
+			Cipher    cipher    = Cipher.getInstance("RSA");
 			cipher.init(Cipher.DECRYPT_MODE, publicKey);
 
 			// 암호문을 디코딩
@@ -137,7 +143,7 @@ public class CryptoClient {
 		try {
 
 			// key string에 필요없는값 지우기
-			stringPublicKey= stringPublicKey.replaceAll("\n", "")
+			stringPublicKey = stringPublicKey.replaceAll("\n", "")
 				.replace("-----BEGIN BRCOIN PUBLIC KEY-----", "")
 				.replace("-----END BRCOIN PUBLIC KEY-----", "");
 
@@ -159,7 +165,7 @@ public class CryptoClient {
 		try {
 
 			// key string에 필요없는값 지우기
-			stringPrivateKey= stringPrivateKey.replaceAll("\n", "")
+			stringPrivateKey = stringPrivateKey.replaceAll("\n", "")
 				.replace("-----BEGIN BRCOIN PRIVATE KEY-----", "")
 				.replace("-----END BRCOIN PRIVATE KEY-----", "");
 

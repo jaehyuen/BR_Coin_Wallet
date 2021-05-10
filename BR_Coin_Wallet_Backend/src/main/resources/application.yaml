@@ -4,7 +4,7 @@ spring:
   datasource:
     initialization-mode: always
     password: 1111
-    url: 'jdbc:mysql://192.168.56.127:3306/brwallet?serverTimezone=UTC'
+    url: 'jdbc:mysql://192.168.56.127:3306/brwallet?serverTimezone=UTC&characterEncoding=utf8'
     username: root
     hikari:
       auto-commit: false
@@ -34,7 +34,6 @@ spring:
           auth: true
           starttls:
             enable: true
-
 email:
   message: |
            1. Andriod용 Google OTP 및 IOS용 Google Authenticator 애플리케이션을 다운로드하십시오. <br>
@@ -42,3 +41,6 @@ email:
            2. 앱으로 아래 QR코드를 스캔하여 OTP를 등록하십시오.<br>
            <br>
   subject: barakwallet qrcode 발송
+
+rest:
+  url: http://192.168.56.127:8081

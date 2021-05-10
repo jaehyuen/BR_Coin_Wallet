@@ -15,14 +15,14 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Entity
-@Table(name = "WALLET")
+@Table(name = "BR_WALLET")
 @AllArgsConstructor
 @NoArgsConstructor
 public class WalletEntity extends BaseEntity {
 
 	@Id
-	@Column(name = "WALLET_ADDRESS", unique = true, nullable = false, columnDefinition = "LONGTEXT")
-	private String otpUrl;
+	@Column(name = "WALLET_ADDRESS", unique = true)
+	private String walletAddress;
 
 	@Column(name = "WALLET_PUB_KEY", unique = true, nullable = false, columnDefinition = "LONGTEXT")
 	private String publicKey;

@@ -63,36 +63,43 @@ public class AuthService {
 	 * @return 회원가입 결과 DTO
 	 */
 
-	public ResultVo<Object> register(RegisterVo registerVo) {
+	public ResultVo<String> register(RegisterVo registerVo) {
 
 		try {
+			logger.debug("[register] start ");
+			logger.debug("[register] registerVo -> " + registerVo);
 
 			GoogleAuthenticatorKey key   = otpClient.createKey();
-			String                 qrUrl = otpClient.createQrUrl(registerVo.getUserName(), "test", key);
+			String                 qrUrl = otpClient.createQrUrl(registerVo.getUserName(), "brwallet", key);
 
 			// qr코드 이미지 저장
 			util.saveImage(qrUrl, key.getKey());
 
 			// otp 정보 생성
-			OtpEntity otpEntity = new OtpEntity();
-			otpEntity.setOptKey(key.getKey());
-			otpEntity.setOtpUrl(qrUrl);
-			otpEntity.setOtpFilePath(System.getProperty("user.dir") + "/otp/" + key.getKey() + ".jpg");
+			OtpEntity otp = new OtpEntity();
+			otp.setOptKey(key.getKey());
+			otp.setOtpUrl(qrUrl);
+			otp.setOtpFilePath(System.getProperty("user.dir") + "/otp/" + key.getKey() + ".jpg");
 
-			otpRepository.save(otpEntity);
+			otpRepository.save(otp);
+
+			logger.debug("[register] otpEntity -> " + otp);
 
 			// 유저 정보 엔티티 생성
-			UserEntity userEntity = new UserEntity();
+			UserEntity user = new UserEntity();
 
-			userEntity.setUserName(registerVo.getUserName());
-			userEntity.setUserId(registerVo.getUserId());
-			userEntity.setUserEmail(registerVo.getUserEmail());
-			userEntity.setUserPassword(passwordEncoder.encode(registerVo.getUserPassword()));
-			userEntity.setOtpEntity(otpEntity);
-			userEntity.setActive(false);
+			user.setUserName(registerVo.getUserName());
+			user.setUserId(registerVo.getUserId());
+			user.setUserEmail(registerVo.getUserEmail());
+			user.setUserPassword(passwordEncoder.encode(registerVo.getUserPassword()));
+			user.setOtpEntity(otp);
+			user.setActive(false);
+			user.setPrivateKeyYn(false);
 
 			// 유저 정보 엔티티 저장
-			userRepository.save(userEntity);
+			saveUserEntity(user);
+
+			logger.debug("[register] userEntity -> " + user);
 
 			String str = "<h3>" + registerVo.getUserName() + "님 회원가입을 환영합니다.</h3><br>아래 설명을 따라서 OTP 등록을 진행해 주시기 바랍니다.<br><br>";
 
@@ -100,11 +107,10 @@ public class AuthService {
 
 		} catch (Exception e) {
 
-			logger.error(e.getMessage());
-			e.printStackTrace();
-			return util.setResult("9999", false, e.getMessage(), null);
+			logger.debug("[register] error ");
 
 		}
+		logger.debug("[register] finish ");
 		return util.setResult("0000", true, "Success register ", null);
 	}
 
@@ -116,23 +122,29 @@ public class AuthService {
 	 * @return
 	 * 
 	 */
-	
-	public ResultVo<Object> active(LoginVo loginVo) {
 
-		UserEntity user = userRepository.findByUserId(loginVo.getUserId())
-			.orElseThrow(() ->new IllegalArgumentException("can't find user "+loginVo.getUserId()+" in database"));
-		
+	public ResultVo<String> active(LoginVo loginVo) {
+
+		logger.debug("[active] start ");
+		logger.debug("[active] loginVo -> " + loginVo);
+
+		UserEntity user = findUserByUserId(loginVo.getUserId());
 
 		if (!passwordEncoder.matches(loginVo.getUserPassword(), user.getUserPassword())) {
 			return util.setResult("9999", false, "fail login", null);
 		}
 
-		//오티피 정보 확인시 계정 활성화
+		// 오티피 정보 확인시 계정 활성화
 		if (otpClient.otpAuthorize(user.getOtpEntity()
 			.getOptKey(), loginVo.getOtpCode())) {
+
 			user.setActive(true);
+			logger.debug("[active] finish ");
+
 			return util.setResult("0000", true, "Success login", null);
 		} else {
+
+			logger.debug("[active] error ");
 			return util.setResult("9999", false, "fail login", null);
 		}
 
@@ -147,6 +159,9 @@ public class AuthService {
 	 */
 
 	public ResultVo<JwtTokenVo> login(LoginVo loginVo) {
+
+		logger.debug("[login] start ");
+		logger.debug("[login] loginVo -> " + loginVo);
 
 		// 로그인 시작 (로그인 실패시 401리턴)
 		Authentication authenticate = authenticationManager.authenticate(new OtpAuthenticationToken(loginVo.getUserId(), loginVo.getUserPassword(), loginVo.getOtpCode()));
@@ -167,6 +182,9 @@ public class AuthService {
 			.userId(loginVo.getUserId())
 			.build();
 
+		logger.debug("[login] jwtTokenVo -> " + jwtTokenVo);
+
+		logger.debug("[login] finish ");
 		return util.setResult("0000", true, "Success login", jwtTokenVo);
 	}
 
@@ -180,6 +198,9 @@ public class AuthService {
 
 	@Transactional(readOnly = true)
 	public ResultVo<JwtTokenVo> refreshToken(RefreshTokenVo refreshTokenVo) {
+
+		logger.debug("[refreshToken] start ");
+		logger.debug("[refreshToken] refreshTokenVo -> " + refreshTokenVo);
 
 		// 리프레쉬 토큰 유효성 검사
 		refreshTokenService.validateRefreshToken(refreshTokenVo.getRefreshToken());
@@ -196,7 +217,19 @@ public class AuthService {
 			.userId(refreshTokenVo.getUserId())
 			.build();
 
+		logger.debug("[refreshToken] jwtTokenVo -> " + jwtTokenVo);
+
+		logger.debug("[refreshToken] finish ");
 		return util.setResult("0000", true, "Success refresh token", jwtTokenVo);
+	}
+
+	public UserEntity saveUserEntity(UserEntity userEntity) {
+		return userRepository.save(userEntity);
+	}
+
+	public UserEntity findUserByUserId(String userId) {
+		return userRepository.findByUserId(userId)
+			.orElseThrow(() -> new IllegalArgumentException("can't find user " + userId + " in database"));
 	}
 
 }
