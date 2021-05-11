@@ -50,14 +50,14 @@ public class Util {
 		headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
 		HttpEntity<T>               request  = new HttpEntity<T>(body, headers);
-		
-		System.out.println(request);
 
 		ResponseEntity<ResultVo<S>> response = restTemplate.exchange(url + path, HttpMethod.POST, request, createReturnType(type));
 
-		System.out.println(response);
+		if (response.getBody().getResultCode().equals("9999")) {
+			throw new IllegalArgumentException("브릿지와 통신 중 오류가 발생하였습니다. - " + response.getBody());
+
+		}
 		return response.getBody();
-			
 
 	}
 

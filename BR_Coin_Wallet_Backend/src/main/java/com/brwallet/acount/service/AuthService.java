@@ -228,7 +228,7 @@ public class AuthService {
 	}
 
 	public UserEntity findUserByUserId(String userId) {
-		return userRepository.findByUserId(userId)
+		return userRepository.findOptionalByUserId(userId)
 			.orElseThrow(() -> new IllegalArgumentException("can't find user " + userId + " in database"));
 	}
 

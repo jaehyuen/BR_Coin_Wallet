@@ -31,7 +31,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	@Override
 	@Transactional(readOnly = true)
 	public OtpUser loadUserByUsername(String userId) {
-		Optional<UserEntity> userOptional = userRepository.findByUserId(userId);
+		Optional<UserEntity> userOptional = userRepository.findOptionalByUserId(userId);
 		UserEntity           user         = userOptional.orElseThrow(() -> new IllegalArgumentException("can't find user "+userId+" in database"));
 
 		

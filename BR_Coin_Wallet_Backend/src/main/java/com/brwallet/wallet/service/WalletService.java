@@ -15,6 +15,7 @@ import com.brwallet.acount.service.AuthService;
 import com.brwallet.client.CryptoClient;
 import com.brwallet.common.BridgePath;
 import com.brwallet.common.Util;
+import com.brwallet.common.error.exception.WalletExistException;
 import com.brwallet.common.vo.ResultVo;
 import com.brwallet.wallet.entity.WalletEntity;
 import com.brwallet.wallet.repository.WalletRepository;
@@ -46,6 +47,11 @@ public class WalletService {
 		ResultVo<String> result      = new ResultVo<String>();
 
 		logger.debug("[createWallet] loginedUser is  -> " + loginedUser.getName());
+
+		if (user.getWalletEntity() != null) {
+			logger.debug("[createWallet] error ");
+			throw new WalletExistException(user.getUserId() + " 계정에 이미 지갑이 존재합니다.");
+		}
 
 		try {
 			KeyPairVo keyPair = cryptoClient.generateKeys();
@@ -87,6 +93,12 @@ public class WalletService {
 		logger.debug("[getWallet] walletId -> " + walletId);
 
 		ResultVo<WalletVo> result = util.sendGet(BridgePath.GET_WALLET.getValue() + walletId, WalletVo.class);
+
+		if (result.getResultCode()
+			.equals("9999")) {
+			throw new IllegalArgumentException("지갑 주소가 잘못되었습니다. 지갑 주소 : " + walletId);
+
+		}
 
 		logger.debug("[getWallet] finish ");
 

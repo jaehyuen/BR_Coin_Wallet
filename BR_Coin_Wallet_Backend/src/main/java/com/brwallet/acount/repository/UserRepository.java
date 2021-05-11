@@ -9,6 +9,6 @@ import com.brwallet.acount.entity.UserEntity;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
-	Optional<UserEntity> findByUserId(String userId);
+	Optional<UserEntity> findOptionalByUserId(String userId);
 	UserEntity findByUserIdAndUserPassword(String userId,String userPassword);
 }

@@ -47,7 +47,7 @@ public class RefreshTokenService {
 	 */
 
 	public void validateRefreshToken(String refreshToken) {
-		refreshTokenRepository.findByToken(refreshToken)
+		refreshTokenRepository.findOptionalByToken(refreshToken)
 			.orElseThrow(() -> new EntityNotFoundException("Invalid refresh Token"));
 	}
 

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.HttpClientErrorException;
 
 import com.brwallet.common.Util;
+import com.brwallet.common.error.exception.WalletExistException;
 import com.brwallet.common.vo.ResultVo;
 
 import io.jsonwebtoken.io.IOException;
@@ -27,7 +28,7 @@ public class ControllerExceptionHandler {
 	@ExceptionHandler(HttpRequestMethodNotSupportedException.class)
 	protected ResponseEntity<ResultVo<String>> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e) {
 		e.printStackTrace();
-		return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+		return ResponseEntity.status(HttpStatus.CONFLICT)
 			.body(util.setResult("9999", false, e.getMessage(), null));
 	}
 
@@ -35,15 +36,15 @@ public class ControllerExceptionHandler {
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	protected ResponseEntity<ResultVo<String>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
 		e.printStackTrace();
-		return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+		return ResponseEntity.status(HttpStatus.CONFLICT)
 			.body(util.setResult("9999", false, e.getMessage(), null));
 	}
 
-	// 디비조회 에러
+	// 디비조회 에러(변수 틀림 에러)
 	@ExceptionHandler(IllegalArgumentException.class)
 	protected ResponseEntity<ResultVo<String>> handleIllegalArgumentException(IllegalArgumentException e) {
 		e.printStackTrace();
-		return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+		return ResponseEntity.status(HttpStatus.CONFLICT)
 			.body(util.setResult("9999", false, e.getMessage(), null));
 	}
 
@@ -51,14 +52,14 @@ public class ControllerExceptionHandler {
 	@ExceptionHandler(BadCredentialsException.class)
 	protected ResponseEntity<ResultVo<String>> test(BadCredentialsException e) {
 		e.printStackTrace();
-		return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 			.body(util.setResult("9999", false, e.getMessage(), null));
 	}
 
 	@ExceptionHandler({ NoSuchAlgorithmException.class, NoSuchProviderException.class, IOException.class })
 	protected ResponseEntity<ResultVo<String>> test(Exception e) {
 		e.printStackTrace();
-		return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+		return ResponseEntity.status(HttpStatus.CONFLICT)
 			.body(util.setResult("9999", false, e.getMessage(), null));
 	}
 
@@ -66,7 +67,15 @@ public class ControllerExceptionHandler {
 	@ExceptionHandler(HttpClientErrorException.class)
 	protected ResponseEntity<ResultVo<String>> handleHttpClientErrorExceptionException(HttpClientErrorException e) {
 		e.printStackTrace();
-		return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+			.body(util.setResult("9999", false, e.getMessage(), null));
+	}
+
+	// 지갑이 이미 존재 에러
+	@ExceptionHandler(WalletExistException.class)
+	protected ResponseEntity<ResultVo<String>> handleHttpClientErrorExceptionException(WalletExistException e) {
+		e.printStackTrace();
+		return ResponseEntity.status(HttpStatus.CONFLICT)
 			.body(util.setResult("9999", false, e.getMessage(), null));
 	}
 

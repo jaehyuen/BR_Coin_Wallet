@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.brwallet.acount.entity.RefreshTokenEntity;
 
 public interface RefreshTokenRepository extends JpaRepository<RefreshTokenEntity, Long> {
-	Optional<RefreshTokenEntity> findByToken(String token);
+	Optional<RefreshTokenEntity> findOptionalByToken(String token);
 
 	void deleteByToken(String token);
 }
