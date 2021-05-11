@@ -54,7 +54,7 @@ public class Util {
 		ResponseEntity<ResultVo<S>> response = restTemplate.exchange(url + path, HttpMethod.POST, request, createReturnType(type));
 
 		if (response.getBody().getResultCode().equals("9999")) {
-			throw new IllegalArgumentException("브릿지와 통신 중 오류가 발생하였습니다. - " + response.getBody());
+			throw new IllegalArgumentException("브릿지와 통신 중 오류가 발생하였습니다. - " + response.getBody().getResultMessage());
 
 		}
 		return response.getBody();
